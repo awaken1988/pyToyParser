@@ -1,0 +1,8 @@
+program     = { block, ";" };
+block       =   identifier = expression
+              | "for", expression, "to", expression, "{", {block}, "}";
+expression  = numericitem, operator, numericitem {operator, numericitem}
+numericitem = number | identifier
+number      = ?number?
+identifier  = ?identifier?
+operator      = "+" | "-" | "*" | "/"
