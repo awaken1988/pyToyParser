@@ -1,5 +1,5 @@
 #TODO: show more helpful parser errors
-#
+#TODO: epxression like a = x * y doesn't work because last symbol is no number?
 #
 
 from Lexer import *

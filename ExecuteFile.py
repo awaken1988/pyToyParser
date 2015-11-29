@@ -1,5 +1,6 @@
 from Parser import AstNode
 from Parser import Parser
+from Lexer  import Token
 import sys
 
 
@@ -29,6 +30,16 @@ class ExecuteAst:
         for i in aBranch.children:
             if i.token.content == "=":
                 self.call(self.exec_assignment, i)
+            elif i.token.content == "for":
+                self.call(self.exec_for, i)
+
+    #TODO: is like self.exec without loop; merge these functions
+    def exec_inner_loop(self, aBranch):
+        if aBranch.token.content == "=":
+            self.call(self.exec_assignment, aBranch)
+        elif aBranch.token.content == "for":
+            self.call(self.exec_for, aBranch)
+
 
     #TODO: replace index-numbers with symbolic values
     def exec_assignment(self, aBranch):
@@ -41,7 +52,10 @@ class ExecuteAst:
     def exec_expression(self, aBranch):
         #return value
         if len(aBranch.children) < 1:
-            return int(aBranch.token.content)
+            if aBranch.token.type == Token.IDENTIFIER:
+                return int(self.identifiers[aBranch.token.content])
+            else:
+                return int(aBranch.token.content)
         #more complex expression
         else:
             op = aBranch.token.content;
@@ -66,12 +80,31 @@ class ExecuteAst:
 
             return ret
 
+    def exec_for(self, aBranch):
+        start_node = aBranch.children[0]
+        end_node   = aBranch.children[1]
+        prev_index = 2
+
+        start_index = self.call(self.exec_expression, start_node)
+        end_index   = self.call(self.exec_expression, end_node)
+
+        for i in range(0, end_index-start_index+1):
+            for inner_loop_elem in aBranch.children[prev_index:]:
+                self.call(self.exec_inner_loop, inner_loop_elem)
+
+        #print(str(start_index) + " to " + str(end_index) )
+
+
+
+
 testProgram = """
-start = 0;
+start = 1;
 end   = 1+2+3+4*5;
+a = 2;
+mult = 2;
 for start to end
 {
-        a = 0;
+    a = a * mult * 2;
 };
 """
 
