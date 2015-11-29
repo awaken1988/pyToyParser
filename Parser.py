@@ -1,3 +1,7 @@
+#TODO: show more helpful parser errors
+#
+#
+
 from Lexer import *
 
 class AstNode:
@@ -26,14 +30,22 @@ class Parser:
     MATH_OPERATORS = ["+", "-", "*", "/"]
     ASSIGNMENT     = "="
 
-
-    def __init__(self):
-        lexer = Lexer(testCode)
+    def __init__(self, aProgramText):
+        lexer = Lexer(aProgramText)
         self.content = lexer.tokens       #Array of Token
         print("-------------------------------")
-        a = self.ebnf_progam()
+        self.ast = self.ebnf_progam()
 
-        print( a )
+        print( self.ast )
+
+
+
+    #only for testing
+    #def __init__(self):
+    #    lexer = Lexer(testCode)
+    #    self.content = lexer.tokens       #Array of Token
+    #    print("-------------------------------")
+    #    a = self.ebnf_progam()
 
     def error(self):
         errStr = "error:"
