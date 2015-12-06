@@ -99,19 +99,10 @@ class Parser:
     def ebnf_block(self):
         ret = None
 
-        if self.check(Token.IDENTIFIER):
-            node_identifier = AstNode( self.nextToken() )
-
-            node_assignment = self.check(Token.SYMBOL, Parser.ASSIGNMENT);
-            self.nextToken()
-            if not node_assignment: self.error()
-
-            node_expr = self.ebnf_expression()
-            if not node_expr: self.error()
-
-            ret = node_assignment
-            ret.addNode(node_identifier)
-            ret.addNode(node_expr)
+        assignment = self.ebnf_assignment();
+        
+        if assignment:
+            ret = assignment;
         elif self.check(Token.SYMBOL, "for"):
             node_for = AstNode( self.nextToken() )
 
@@ -158,6 +149,25 @@ class Parser:
 
             ret = node_for
         return ret
+
+    def ebnf_assignment(self):
+        if self.check(Token.IDENTIFIER):
+            node_identifier = AstNode( self.nextToken() )
+    
+            node_assignment = self.check(Token.SYMBOL, Parser.ASSIGNMENT);
+            self.nextToken()
+            if not node_assignment: self.error()
+    
+            node_expr = self.ebnf_expression()
+            if not node_expr: self.error()
+    
+            ret = node_assignment
+            ret.addNode(node_identifier)
+            ret.addNode(node_expr)
+            return ret;
+        else:
+            return None
+        
 
     def ebnf_expression(self):
         result = self.ebnf_numericitem()
