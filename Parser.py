@@ -107,7 +107,7 @@ class Parser:
             node_for = AstNode( self.nextToken() )
 
             #start loop expression
-            node_expr_start = self.ebnf_expression()
+            node_expr_start = self.ebnf_assignment()
             if not node_expr_start: self.error()
 
             if not self.check(Token.SYMBOL, "to"):

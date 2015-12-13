@@ -3,10 +3,56 @@ from Parser import Parser
 from Lexer  import Token
 import sys
 
+class IdentifierMap:
+    def __init__(self):
+        self.content = [ {} ]
+        
+    def _search(self, aIdentifier):
+        reverse_content = reversed(self.content)
+        reverse_index   = reversed(range(len(self.content)))
+        for index, scope in zip(reverse_index,reverse_content):
+            if aIdentifier in scope:
+                return index;
+        return -1;
+            
+    def contains(self, aIdentifier):
+        if self._search(aIdentifier) >= 0:
+            return True
+        else:
+            return False;
+    
+    def insert(self, aIdentifier, aValue, aTopScope=False):
+        idx = self._search(aIdentifier)
+        if -1 == idx or aTopScope:
+            idx = len(self.content) - 1
+        
+        self.content[idx][aIdentifier] = aValue 
+        
+
+    def pushScope(self):
+        self.content.append({})
+    
+    def popScope(self):
+        self.content.pop()
+        
+        
+    def __setitem__(self, aIdentfier, aValue):
+        self.insert(aIdentfier, aValue) 
+        
+    def __getitem__(self, aIdentifier):
+        index = self._search(aIdentifier)
+        if index < 0:
+            raise Exception("Identifier not found")
+        else:
+            return self.content[index][aIdentifier]
+    
+    def __str__(self):
+        return str(self.content)
+        
 
 class ExecuteAst:
     def __init__(self, aAst):
-        self.identifiers = {}
+        self.identifiers = IdentifierMap()
         self.depth = -1
 
         self.call(self.exec, aAst)
@@ -85,15 +131,21 @@ class ExecuteAst:
         end_node   = aBranch.children[1]
         prev_index = 2
 
-        start_index = self.call(self.exec_expression, start_node)
-        end_index   = self.call(self.exec_expression, end_node)
+        #counter variable get own scope
+        #variables assigned in the loop get their own scope
+        self.identifiers.pushScope()
 
-        for i in range(0, end_index-start_index+1):
+        self.call(self.exec_assignment, start_node)
+        counter_var   = start_node.children[0].token.content
+        end_index     = int(self.call(self.exec_expression, end_node))
+
+        for i in range(self.identifiers[counter_var], end_index+1 ):
             for inner_loop_elem in aBranch.children[prev_index:]:
                 self.call(self.exec_inner_loop, inner_loop_elem)
-
-        #print(str(start_index) + " to " + str(end_index) )
-
+                self.identifiers[counter_var] = i
+                
+        self.identifiers.popScope()
+                
 
 
 
@@ -102,7 +154,7 @@ start = 1;
 end   = 1+2+3+4*5;
 a = 2;
 mult = 2;
-for start to end
+for i = 1 to end
 {
     a = a * mult * 2;
 };
