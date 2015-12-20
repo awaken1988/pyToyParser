@@ -89,6 +89,10 @@ class ExecuteAst:
             self.call(self.exec_assignment, aBranch)
         elif aBranch.token.content == "for":
             self.call(self.exec_for, aBranch)
+        elif aBranch.token.content == "if":
+            self.call(self.exec_if, aBranch)
+        else:
+            raise Exception("error: command not included")
 
 
     #TODO: replace index-numbers with symbolic values
@@ -169,9 +173,18 @@ class ExecuteAst:
             enterIf == left < right;
         
         #if true execute tree
-        if enterIf:
-            print("ausführen :)")
         
+        if enterIf:
+            statements_start = 3
+            statements_end   = len(aBranch.children) -1;
+            
+            #if block has no content
+            if statements_end < statements_start:
+                return; 
+            
+            for i in range(statements_start, statements_end+1):
+                self.call(self.exec_inner_loop, aBranch.children[i])
+
         return
         
                 
@@ -196,12 +209,20 @@ for i = 1 to end
 """
 
 testProgram = """
-x = 1;
-y = 2;
-if x == y
+c1 = 1;
+c2 = 10;
+x = 0;
+
+if c1 == 1 
 {
-    a = 1;
+    x = x + 1;
 };
+
+if c2 > 9
+{
+    x = x + 2;
+};
+
 """
 
 
