@@ -148,8 +148,59 @@ class Parser:
                 node_for.addNode(i)
 
             ret = node_for
+        elif self.check(Token.SYMBOL, "if"):
+            ret = AstNode( self.nextToken() )
+            
+            node_left = self.ebnf_expression()
+            if not node_left:
+                self.error()
+            
+            node_comp  = self.ebnf_compare()
+            if not node_comp:
+                self.error()
+                
+            node_right = self.ebnf_expression()
+            if not node_right:
+                self.error()
+            
+            #inner loop
+            nodes_inner = []
+            while True:
+                node_inner_tmp = self.ebnf_block()
+                if not node_inner_tmp:
+                    if len(nodes_inner) < 1 :
+                        self.error()
+                    break
+                nodes_inner.append(node_inner_tmp)
+
+                if not self.check(Token.SYMBOL, ";"):
+                    self.error()
+                self.nextToken()
+
+
+
+            if not self.check(Token.SYMBOL, "}"):
+                self.error()
+            self.nextToken()
+                
+            ret.addNode(node_comp)
+            ret.addNode(node_left)
+            ret.addNode(node_right)
+            for i in nodes_inner:
+                ret.addNode(i)                
+    
+            
+             
         return ret
 
+    def ebnf_compare(self):
+        comp = "<=", ">=", "==", "<", ">";
+        
+        for i in comp:
+            if self.check(Token.SYMBOL, i):
+                return AstNode( self.nextToken() )
+        return None
+            
     def ebnf_assignment(self):
         if self.check(Token.IDENTIFIER):
             node_identifier = AstNode( self.nextToken() )

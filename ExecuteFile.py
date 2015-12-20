@@ -154,6 +154,12 @@ start = 1;
 end   = 1+2+3+4*5;
 a = 2;
 mult = 2;
+
+if a == mult
+{
+    mult = 3;
+};
+
 for i = 1 to end
 {
     a = a * mult * 2;

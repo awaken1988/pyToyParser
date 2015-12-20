@@ -14,7 +14,9 @@ class Token:
 
     KEYWORDS = [    "for", "to", "do",
                     "{", "}", ";", "=",
-                    "+", "-", "*", "/"
+                    "+", "-", "*", "/",
+                    "if", ">", "<" "==",
+                    "<=", "<="
                 ]
 
     IDENTIFIER_STARTCHARS = list(string.ascii_lowercase)
