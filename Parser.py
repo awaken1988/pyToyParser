@@ -163,6 +163,11 @@ class Parser:
             if not node_right:
                 self.error()
             
+            
+            if not self.check(Token.SYMBOL, "{"):
+                self.error()
+            self.nextToken()
+            
             #inner loop
             nodes_inner = []
             while True:

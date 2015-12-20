@@ -78,6 +78,10 @@ class ExecuteAst:
                 self.call(self.exec_assignment, i)
             elif i.token.content == "for":
                 self.call(self.exec_for, i)
+            elif i.token.content == "if":
+                self.call(self.exec_if, i)
+            else:
+                raise Exception("error: command not included")
 
     #TODO: is like self.exec without loop; merge these functions
     def exec_inner_loop(self, aBranch):
@@ -145,6 +149,31 @@ class ExecuteAst:
                 self.identifiers[counter_var] = i
                 
         self.identifiers.popScope()
+        
+    def exec_if(self, aBranch):
+        comparison = aBranch.children[0].token.content;
+        left   = int(   self.call(self.exec_expression, aBranch.children[1] )   )
+        right  = int(   self.call(self.exec_expression, aBranch.children[2] )   )
+        
+        enterIf = False
+        
+        if   "==" == comparison:
+            enterIf = left == right;
+        elif ">=" == comparison:
+            enterIf = left >= right;
+        elif "<=" == comparison:
+            enterIf = left <= right;
+        elif ">"  == comparison:
+            enterIf = left > right;
+        elif "<"  == comparison:
+            enterIf == left < right;
+        
+        #if true execute tree
+        if enterIf:
+            print("ausführen :)")
+        
+        return
+        
                 
 
 
@@ -155,7 +184,7 @@ end   = 1+2+3+4*5;
 a = 2;
 mult = 2;
 
-if a == mult
+if a >= mult
 {
     mult = 3;
 };
@@ -165,6 +194,17 @@ for i = 1 to end
     a = a * mult * 2;
 };
 """
+
+testProgram = """
+x = 1;
+y = 2;
+if x == y
+{
+    a = 1;
+};
+"""
+
+
 
 if __name__ == "__main__":
     astTree = Parser(testProgram).ast

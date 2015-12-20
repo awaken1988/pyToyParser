@@ -129,7 +129,7 @@ class Scanner:
             If nothing is found under the current position return NONE"""
 
         aStringList = aStringList[:]
-        aStringList.sort(key=len)
+        aStringList.sort(key=len, reverse=True)
 
         for i in aStringList:
             try:
