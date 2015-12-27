@@ -35,6 +35,13 @@ class IdentifierMap:
     def popScope(self):
         self.content.pop()
         
+    def dumpMap(self):
+        ret = {}
+        for iScope in self.content:
+            for iName, iValue in iScope.items():
+                ret[iName] = iValue
+        return ret
+        
         
     def __setitem__(self, aIdentfier, aValue):
         self.insert(aIdentfier, aValue) 
