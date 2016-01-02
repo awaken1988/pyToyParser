@@ -28,6 +28,11 @@ if val > 10
 };
 
 ```
+The result of this code is
+* start is 1 (for completeness)
+* end is 10 (for completeness)
+* over10 is 1 (because val is greater than 10)
+* val is 20 (see the for loop)
 
 Please note that currently arithmetical expressions evaluated right recursive.
 The result of the following example is *9* and not *7*
