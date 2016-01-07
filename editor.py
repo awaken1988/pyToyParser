@@ -6,6 +6,7 @@ from Parser import AstNode
 from Parser import Parser
 from Lexer  import Token
 from ExecuteFile import ExecuteAst
+from widgets.CodeEditor import CodeEditor
 
 
 #REFERENCES:
@@ -42,7 +43,7 @@ class MainWindow(QWidget):
         self.show()
 
     def initCodeEditor(self):
-        self.codeEditor = QTextEdit()
+        self.codeEditor = CodeEditor(self)
         self.grid.addWidget(self.codeEditor, 2, 1)
         
         defaultCode = """
@@ -69,7 +70,7 @@ if x > 0
 
         """
         
-        self.codeEditor.setText(defaultCode)
+        self.codeEditor.setPlainText(defaultCode)
         
        
     def initVariableTable(self):

@@ -14,12 +14,12 @@ class LineNumberArea(QWidget):
         return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
     
     def paintEvent(self, event):
-        print("LineNumberArea::paintEvent")
+        #print("LineNumberArea::paintEvent")
         self.codeEditor.lineNumberAreaPaintEvent(event)
 
 class CodeEditor(QPlainTextEdit):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, outerWidget):
+        super().__init__(outerWidget)
        
         
         self.lineNumberArea = LineNumberArea(self)
@@ -65,10 +65,11 @@ class CodeEditor(QPlainTextEdit):
             self.updateLineNumberAreaWidth(0)
         
     def highlightCurrentLine(self, *arg):
-        print("CodeEditor::highlightCurrentLine")
+        pass
+        #print("CodeEditor::highlightCurrentLine")
     
     def lineNumberAreaPaintEvent(self, event):
-        print("CodeEditor::lineNumberAreaPaintEvent "+str(event.rect()))
+        #print("CodeEditor::lineNumberAreaPaintEvent "+str(event.rect()))
         painter = QPainter()
         painter.begin(self.lineNumberArea) 
         painter.fillRect(QRect(0, 0, self.lineNumberArea.geometry().width(), self.height()), Qt.gray)
@@ -90,14 +91,14 @@ class CodeEditor(QPlainTextEdit):
         painter.end()
         
     def paintEvent(self, *args, **kwargs):
-        print("CodeEditor::paintEvent")
+        #print("CodeEditor::paintEvent")
         QPlainTextEdit.paintEvent(self, *args, **kwargs)
         
     def resizeEvent(self, e):
-        print("CodeEditor::resizeEvent "+str(e))
+        #print("CodeEditor::resizeEvent "+str(e))
         super().resizeEvent(e)
         cr = self.contentsRect()
-        print("    "+str(cr))
+        #print("    "+str(cr))
         self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))           
 
 if __name__ == "__main__":
