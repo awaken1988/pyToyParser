@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.Qt import *
+from gi.overrides.Gtk import Widget
 
 
 class LineNumberArea(QWidget):
@@ -9,13 +10,18 @@ class LineNumberArea(QWidget):
         super().__init__(editor)
         self.codeEditor = editor
         
-        
     def sizeHint(self, *args, **kwargs):
         return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
     
     def paintEvent(self, event):
         #print("LineNumberArea::paintEvent")
         self.codeEditor.lineNumberAreaPaintEvent(event)
+
+    def mousePressEvent(self, event):
+        print("LineNumberArea: mousePressEvent: x={}; y={}".format(event.x(), event.y()))
+        self.codeEditor.setBreakpointLine(event)
+            
+
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self, outerWidget):
@@ -32,6 +38,8 @@ class CodeEditor(QPlainTextEdit):
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
         self.show()
+        
+        self.breakpoints = set()
         
     def lineNumberAreaWidth(self):
         digits = 1
@@ -81,14 +89,43 @@ class CodeEditor(QPlainTextEdit):
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
+                
+                #draw breakpoint
+                if number in self.breakpoints:
+                    painter.setPen(Qt.red)
+                    painter.fillRect(QRectF(0, top, self.lineNumberArea.width(), self.fontMetrics().height()),    QBrush(Qt.red))
+                
+                #draw number
                 painter.setPen(Qt.black)
                 painter.drawText(0, top, self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignRight, number)
+                
             block = block.next()
             top = bottom
             bottom  = top + self.blockBoundingRect(block).height()
             blockNumber += 1
         
         painter.end()
+        
+    def setBreakpointLine(self, event):
+        block = self.firstVisibleBlock()
+        blockNumber = block.blockNumber()
+        top     = self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
+        bottom  = top + self.blockBoundingRect(block).height()
+        while block.isValid() and top <= event.y():
+            if block.isVisible() and bottom >= event.y():
+                number = str(blockNumber + 1)
+                
+                if number not in self.breakpoints: 
+                    self.breakpoints.add(number)
+                else:
+                    self.breakpoints.remove(number)
+                    
+            block = block.next()
+            top = bottom
+            bottom  = top + self.blockBoundingRect(block).height()
+            blockNumber += 1
+        print(self.breakpoints)
+        self.update()
         
     def paintEvent(self, *args, **kwargs):
         #print("CodeEditor::paintEvent")
@@ -99,10 +136,23 @@ class CodeEditor(QPlainTextEdit):
         super().resizeEvent(e)
         cr = self.contentsRect()
         #print("    "+str(cr))
-        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))           
-
+        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))   
+        
+    def mousePressEvent(self, event):
+        print("CodeEditor: mousePressEvent: x={}; y={}".format(event.x(), event.y()))        
+        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    e = CodeEditor()
+    
+    mainWidget = QWidget()
+    lyt = QHBoxLayout(mainWidget)
+    
+    editor = CodeEditor(mainWidget)
+    
+    
+    
+    lyt.addWidget(editor)
+    
+    mainWidget.show()
     app.exec_()
 
