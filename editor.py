@@ -1,5 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QTextEdit, QLabel, QPushButton, QHBoxLayout, QTableWidget, QTableWidgetItem
+import threading
+import enum
 
 #toy language includes
 from Parser import AstNode
@@ -7,6 +9,7 @@ from Parser import Parser
 from Lexer  import Token
 from ExecuteFile import ExecuteAst
 from widgets.CodeEditor import CodeEditor
+from idlelib.idle_test.test_warning import RunWarnTest
 
 
 #REFERENCES:
@@ -20,7 +23,10 @@ from widgets.CodeEditor import CodeEditor
 #
 
 
-
+class ExecState(enum.Enum):
+    not_running = 0 #ExecuteAst is not running at all
+    running     = 1 #ExecuteAst is running
+    halted      = 2 #ExecuteAst exists but halted (e.g because breakpoint)
 
 
 class MainWindow(QWidget):
@@ -28,6 +34,9 @@ class MainWindow(QWidget):
         super().__init__();
         self.setGeometry(200, 200, 800, 640);
         self.initUi();
+        
+        self.state = ExecState.not_running
+        self.lock  = threading.Lock()
         
     def initUi(self):
         self.setWindowTitle("Toy Language")
@@ -51,9 +60,9 @@ x = 1;
 y = 1;
 z = 2;
 
-for i=0 to 100 
+for i=0 to 2
 {
-    for j=0 to 100
+    for j=0 to 2
     {
         x = x + 1;
     };
@@ -94,16 +103,25 @@ if x > 0
     def run(self):
         content = self.codeEditor.toPlainText()
         
+        astTree = None
         
+        #parse
         try:
             astTree = Parser(content).ast
             self.execAst = ExecuteAst(astTree)
-            self.updateVariableTable()
+            self.interpreter_thread = threading.Thread(self.execAst.run()) 
+            self.interpreter_thread.start()
         except Exception as e:
             print(e)
             
+        self.runWaitReady()
         
-            
+    def runWaitReady(self):
+        while not self.execAst.isEnd:
+            self.lock.acquire()    
+            self.lock.release()
+        self.updateVariableTable()     
+        
     def updateVariableTable(self):
         currentVars = self.execAst.identifiers.dumpMap()
         

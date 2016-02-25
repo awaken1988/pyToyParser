@@ -58,17 +58,22 @@ class IdentifierMap:
         
 
 class ExecuteAst:
-    def __init__(self, aAst):
+    def __init__(self, aAst, aLock=None):
         self.identifiers = IdentifierMap()
         self.depth = -1
-
-        self.call(self.exec, aAst)
-
+        self.lock = aLock
+        self.ast = aAst
+        self.isEnd = False
+        
+    def run(self):
+        self.call(self.exec, self.ast)
+        self.isEnd = True
         print(self.identifiers)
-
 
     #Fixme: throw error if func is not from this class
     def call(self, func, aBranch):
+        if self.lock:
+            self.lock.acquire()
         self.depth += 1
 
         #debug
@@ -77,6 +82,8 @@ class ExecuteAst:
         ret = func(aBranch)
 
         self.depth -= 1
+        if self.lock:
+            self.lock.release()
         return ret
 
     def exec(self, aBranch):
