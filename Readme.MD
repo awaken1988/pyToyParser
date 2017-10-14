@@ -10,7 +10,7 @@ Currently the following statements are supported:
 
 The only datatype in this languages are numbers. 
 
-#Example
+# Example
 ```
 start = 1;
 end = 10;
@@ -41,7 +41,7 @@ Now the parser uses the precedence climbing methode to implement
 proper handling of operator precedence 
 
 
-#References
+# References
 The following sides contains helpful informations about how to build a Parser
 * http://parsingintro.sourceforge.net/
 * http://mariusbancila.ro/blog/2009/02/05/evaluating-expressions-part-3-building-the-ast/
