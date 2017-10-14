@@ -151,7 +151,7 @@ class Parser:
         elif self.check(Token.SYMBOL, "if"):
             ret = AstNode( self.nextToken() )
             
-            node_left = self.ebnf_expression(1)
+            node_left = self.ebnf_expression()
             if not node_left:
                 self.error()
             
@@ -159,7 +159,7 @@ class Parser:
             if not node_comp:
                 self.error()
                 
-            node_right = self.ebnf_expression(1)
+            node_right = self.ebnf_expression()
             if not node_right:
                 self.error()
             
@@ -214,7 +214,7 @@ class Parser:
             self.nextToken()
             if not node_assignment: self.error()
     
-            node_expr = self.ebnf_expression(1)
+            node_expr = self.ebnf_expression()
             if not node_expr: self.error()
     
             ret = node_assignment
@@ -232,40 +232,47 @@ class Parser:
         "/": 2,
     }
 
-    def ebnf_expression(self, min_prec):
-        tree = self.ebnf_numericitem()
-        if not tree:    return None
+    def ebnf_expression(self):
+        return self.ebnf_expression_inner(self.ebnf_numericitem(), 1)
 
+
+    def ebnf_expression_inner(self, lhs, curr_prec):
         while True:
-            operator = self.ebnf_operator()
-            if not operator:    break;     
-          
-            op_prec = int(self.OP_PRECEDENCE[operator.token.content])
-            if op_prec < min_prec: break
-
-            prev_tree = tree
-            tree = AstNode( operator )
-            tree.addNode( prev_tree )
+            op = self.ebnf_operator(peek=True)
+            if not op:
+                return lhs
             
-            right = self.ebnf_expression(op_prec)
-            if not right: self.error()
+            op_prec = int(self.OP_PRECEDENCE[op.token.content])
 
-            tree.addNode(right)
+            if op_prec > curr_prec:
+                lhs = self.ebnf_expression_inner(lhs, op_prec)
+                continue
+            elif op_prec < curr_prec:
+                return lhs
+            
+            self.ebnf_operator()    #consume next token
 
-        print("::::" + str(tree))
-        return tree
+            op.addNode( lhs )
+            rhs = self.ebnf_expression_inner(self.ebnf_numericitem(), curr_prec)
+            if not rhs: self.error()
+            op.addNode( rhs )
 
+            lhs = op
+    
+        return lhs
 
     def ebnf_numericitem(self):
         if self.check(Token.NUMBER) or self.check(Token.IDENTIFIER):
             return AstNode( self.nextToken() )
         return None
 
-    def ebnf_operator(self):
+    def ebnf_operator(self, peek=False):
+        check = None
         for iOp in Parser.MATH_OPERATORS:
-            if self.check(Token.SYMBOL, iOp):
-                return AstNode( self.nextToken() )
-        return None
+            check = self.check(Token.SYMBOL, iOp)
+            if check: break;
+        if not peek: self.nextToken()
+        return check
 
 if __name__ == "__main__":
     Parser()
