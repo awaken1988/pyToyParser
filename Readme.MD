@@ -34,13 +34,16 @@ The result of this code is
 * over10 is 1 (because val is greater than 10)
 * val is 20 (see the for loop)
 
-Please note that currently arithmetical expressions evaluated right recursive.
-The result of the following example is *9* and not *7*
-```
-x = 3*2+1
-```
+~~Please note that currently arithmetical expressions evaluated right recursive.
+The result of the following example is *9* and not *7*~~
+
+Now the parser uses the precedence climbing methode to implement
+proper handling of operator precedence 
+
 
 #References
 The following sides contains helpful informations about how to build a Parser
 * http://parsingintro.sourceforge.net/
 * http://mariusbancila.ro/blog/2009/02/05/evaluating-expressions-part-3-building-the-ast/
+* https://en.wikipedia.org/wiki/Operator-precedence_parser
+* https://eli.thegreenplace.net/2012/08/02/parsing-expressions-by-precedence-climbing
