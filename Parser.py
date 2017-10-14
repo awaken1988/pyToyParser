@@ -115,7 +115,7 @@ class Parser:
             self.nextToken()
 
             #end loop expression
-            node_expr_end = self.ebnf_expression()
+            node_expr_end = self.ebnf_expression(1)
             if not node_expr_end: self.error()
 
             if not self.check(Token.SYMBOL, "{"):
@@ -151,7 +151,7 @@ class Parser:
         elif self.check(Token.SYMBOL, "if"):
             ret = AstNode( self.nextToken() )
             
-            node_left = self.ebnf_expression()
+            node_left = self.ebnf_expression(1)
             if not node_left:
                 self.error()
             
@@ -159,7 +159,7 @@ class Parser:
             if not node_comp:
                 self.error()
                 
-            node_right = self.ebnf_expression()
+            node_right = self.ebnf_expression(1)
             if not node_right:
                 self.error()
             
@@ -214,7 +214,7 @@ class Parser:
             self.nextToken()
             if not node_assignment: self.error()
     
-            node_expr = self.ebnf_expression()
+            node_expr = self.ebnf_expression(1)
             if not node_expr: self.error()
     
             ret = node_assignment
@@ -225,21 +225,35 @@ class Parser:
             return None
         
 
-    def ebnf_expression(self):
-        result = self.ebnf_numericitem()
-        if not result:
-            return None
+    OP_PRECEDENCE = {
+        "+": 1,
+        "-": 1,
+        "*": 2,
+        "/": 2,
+    }
 
-        operator = self.ebnf_operator()
-        if operator:
-            operator.addNode(result)
-            nextRec = self.ebnf_expression()
-            if not nextRec: self.error()
-            operator.addNode(nextRec)
+    def ebnf_expression(self, min_prec):
+        tree = self.ebnf_numericitem()
+        if not tree:    return None
 
-            result = operator
+        while True:
+            operator = self.ebnf_operator()
+            if not operator:    break;     
+          
+            op_prec = int(self.OP_PRECEDENCE[operator.token.content])
+            if op_prec < min_prec: break
 
-        return result
+            prev_tree = tree
+            tree = AstNode( operator )
+            tree.addNode( prev_tree )
+            
+            right = self.ebnf_expression(op_prec)
+            if not right: self.error()
+
+            tree.addNode(right)
+
+        print("::::" + str(tree))
+        return tree
 
 
     def ebnf_numericitem(self):

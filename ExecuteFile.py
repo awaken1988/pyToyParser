@@ -72,6 +72,7 @@ class ExecuteAst:
         self.depth += 1
 
         #debug
+        #print(aBranch)
         children_val = [i.token.content+"; " for i in aBranch.children]
         print( "\t" * self.depth + str(aBranch.token.content) + "; Children="+str(children_val));
         ret = func(aBranch)
@@ -229,7 +230,14 @@ if c2 > 9
 {
     x = x + 2;
 };
+"""
 
+testProgram = """
+a = 1+2*3+4;
+"""
+
+testProgram = """
+a = 1+2;
 """
 
 
