@@ -219,11 +219,11 @@ for i = 1 to end
 testProgram = """
 c1 = 1;
 c2 = 10;
-x = 1;
+x = 2;
 
 if c1 == 1 
 {
-    x = x + 1 * 3 + 1;
+    x = x+x*x+1+2*3+4/2;
 };
 
 if c2 > 9
